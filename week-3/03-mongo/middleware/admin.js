@@ -1,22 +1,24 @@
-const { admin } = require("../admins");
+const { Admin } = require("../db/index.js");
+
 // Middleware for handling auth
 async function adminMiddleware(req, res, next) {
     // Implement admin auth logic
     // You need to check the headers and validate the admin from the admin DB. Check readme for the exact headers to be expected
-    const {email,password}=req.headers;
-    try{
-        const check=await admin.findOne({username,password});
-        if(!check){
-            // res.msg = "WRONG ADMIN";
-            res.status(401).json({
-                error:"UNAUTHORISED ADMIN"
-            })
-        }
-    }catch(err){
-        res.status(401).json({err});
+
+    const { username, password } = req.headers;
+
+    const u = await Admin.findOne({
+        username: username,
+        password: password
+    });
+
+    if (!u) {
+        res.status(403).json({
+            msg: "Admin doesn't exist"
+        });
+    } else {
+        next();
     }
-    req.admin=check;
-    next();
 }
 
 module.exports = adminMiddleware;

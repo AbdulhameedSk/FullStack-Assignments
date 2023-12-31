@@ -1,45 +1,74 @@
 const { Router } = require("express");
 const router = Router();
 const userMiddleware = require("../middleware/user");
-const courses = require("../models/courses");
-const users = require("../models/users");
+const { User, Course } = require("../db");
+const { default: mongoose } = require("mongoose");
 
 // User Routes
-router.post('/signup', (req, res) => {
+router.post('/signup', async (req, res) => {
     // Implement user signup logic
-    const {email,password}=req.body;
-    const addu=await users.insertOne({email,password});
-    await addu.save()
+    const { username, password } = req.body;
+
+    const existingUser = await User.findOne({ username });
+
+    if (existingUser) {
+        res.status(403).json({
+            msg: "USER ALREADY EXISTS"
+        });
+    } else {
+        await User.create({ username, password });
         res.json({
-            msg:'USER CREATED SUCCESSFULLY'
-        })
+            message: "User created successfully"
+        });
+    }
 });
 
-router.get('/courses', (req, res) => {
+
+router.get('/courses', async (req, res) => {
     // Implement listing all courses logic
-    const response = await courses.find({});
-     res.json({
-         courses: response
-     })
+    // Implement fetching all courses logic
+    const response = await Course.find({});
+
+    res.json({
+        courses: response
+    })
 });
 
-router.post('/courses/:courseId', userMiddleware, (req, res) => {
+router.post('/courses/:courseId', userMiddleware, async (req, res) => {
     // Implement course purchase logic
-    const cid=req.params.courseId;
-    const email=req.params.body;
-    await users.updateOne({email:email},{"$push":{
-        purchased:courseId
-    }})
-    res.json({msg:"COURSE PURChASED SUCCESSFULLY"})
+    const courseId = req.params.courseId;
+    const username = req.headers.username;
+    try {
+        await User.updateOne({
+            username: username
+        }, {
+            "$push": {
+                purchasedCourses: courseId
+            }
+        })
+    }
+    catch (e) {
+        console.log(e);
+    }
+    res.json({
+        message: "Purchase complete!"
+    })
 });
 
-router.get('/purchasedCourses', userMiddleware, (req, res) => {
+router.get('/purchasedCourses', userMiddleware, async (req, res) => {
     // Implement fetching purchased courses logic
-    const email=req.params.email;
-    const user=await users.findOne({email:email})
-    console.log(purchased);
-    const ucourse=await courses.find({courseId:user.purchased})
-    res.json({ucourse})
+    const user = await User.findOne({
+        username: req.headers.username
+    });
+    const courses = await Course.find({
+        _id: {
+            "$in": user.purchasedCourses
+        }
+    });
+
+    res.json({
+        courses: courses
+    })
 });
 
 module.exports = router

@@ -1,32 +1,27 @@
 const mongoose = require('mongoose');
 
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://abdulhameed:<Password>@travelweb.upbqs02.mongodb.net/Course-Selling');
+mongoose.connect('mongodb+srv://<YOUR-USERNAME>:<YOUR-PASSWORD>@<PROJECT-NAME>.upbqs02.mongodb.net/COLLECTION-NAME');
 
 // Define schemas
 const AdminSchema = new mongoose.Schema({
-    // Schema definition here
-    email:String,
-    password:String
+    username: String,
+    password: String
 });
 
-const UserSchema = new mongoose.Schema({
-    // Schema definition here
-    email:String,
-    password:String,
-    purchased:[{
-        type:mongoose.Schema.Types.ObjectId, //unique Id of course
-        ref:'courses' //collection name
+const UserSchema = new mongoose.Schema({    username: String,
+    password: String,
+    purchasedCourses: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course'
     }]
 });
 
 const CourseSchema = new mongoose.Schema({
-    // Schema definition here
-    course:String,
-    courseId:Number,
-    creator:String,
-    price:Number,
-    hours:Number
+    title: String,
+    description: String,
+    imageLink: String,
+    price: Number
 });
 
 const Admin = mongoose.model('Admin', AdminSchema);

@@ -1,47 +1,60 @@
-const { Router } = require("express");
+const express = require("express");
 const adminMiddleware = require("../middleware/admin");
-const { Course } = require("../solution/db");
-const router = Router();
+const { Admin, Course } = require("../db");
+const router = express.Router();
 
-// Admin Routes
 router.post('/signup', async (req, res) => {
-    try {
-        // Assuming you have an Admin model, use it to create a new admin
-        const { email, password } = req.body;
-        const newAdmin = new admins({ email, password });
-        await newAdmin.save();
-        res.json({ msg: 'Admin created successfully' });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
+    // Implement admin signup logic
+    const { username, password } = req.body;
+
+    // check if a user with this username already exists
+    const preCheck = await Admin.findOne({
+        username: username,
+        password: password
+    });
+
+    if (preCheck) {
+        res.status(401).json({
+            msg: "USER ALREADY EXISTS"
+        });
+    } else {
+        await Admin.create({
+            username: username,
+            password: password
+        });
+
+        res.json({
+            message: 'Admin created successfully'
+        });
     }
 });
 
 router.post('/courses', adminMiddleware, async (req, res) => {
-    try {
-        // Assuming you have a Course model, use it to create a new course
-        const { cname, cid, creater, price, hours } = req.body;
-        const newCourse = new courses({ cname, cid, creater, price, hours });
-        await newCourse.save();
-        res.json({ msg: 'COURSE ADDED' });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+    // Implement course creation logic
+    const title = req.body.title;
+    const description = req.body.description;
+    const imageLink = req.body.imageLink;
+    const price = req.body.price;
+
+    const newCourse = await Course.create({
+        title,
+        description,
+        imageLink,
+        price
+    });
+
+    res.json({
+        message: 'Course created successfully',
+        courseId: newCourse._id
+    });
 });
 
 router.get('/courses', adminMiddleware, async (req, res) => {
-    try {
-        // Assuming you have a Course model, use it to find a course
-        const { cname, creater } = req.body;
-        const course = await courses.findOne({ cname: cname, creater: creater });
-
-        if (!course) {
-            res.status(404).json({ msg: 'Course not found' });
-        } else {
-            res.json({ course });
-        }
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+    // Implement fetching all courses logic
+    const response = await Course.find({});
+    res.json({
+        courses: response
+    });
 });
 
 module.exports = router;

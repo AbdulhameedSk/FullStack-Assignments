@@ -1,21 +1,22 @@
-const { admin } = require("../users");
+const { User } = require("../db");
 
 async function userMiddleware(req, res, next) {
-    // Implement user auth logic
-    // You need to check the headers and validate the user from the user DB. Check readme for the exact headers to be expected
-    const {email,password}=req.headers;
-    try{
-        const check=await users.findOne({email,password})
-        if(!check){
-            res.status(401).json({
-                msg:"UNAUTHORIZED USER"
-            })
-        }
-    }catch{
-        res.status(401).json({msg:"FAILED"})
+    // Implement admin auth logic
+    // You need to check the headers and validate the admin from the admin DB. Check readme for the exact headers to be expected
+    const { username, password } = req.body;
+
+    const u = await User.findOne({
+        username: username,
+        password: password
+    })
+    if (u) {
+        res.status(403).json({
+            msg: "User doesnt exist"
+        })
+    } else {
+        next();
+
     }
-    req.users=check;
-    next();
 }
 
 module.exports = userMiddleware;
