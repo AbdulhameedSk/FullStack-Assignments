@@ -8,15 +8,35 @@
     let oldTodoState = [];
 
     function addTodoToDom() {
-      
+      const newChild=document.createElement('div');
+      newChild.setAttribute("id",`${todo.id}`)
+
+      const title=document.createElement('h2')
+      title.textContent=`Task : ${todo.title}`
+
+      const description=document.createElement('div')
+      description.textContent=`Description : ${todo.description}`
+
+      newChild.appendChild(title);
+      newChild.appendChild(description);
+
+      const Parent= document.getElementById('todos');
+      todolist.appendChild(newChild);
     }
 
     function removeTodoFromDom(todo) {
-      
+      const Parent=document.getElementById('todos');
+      const Child=document.getElementById(todo)
+      todolist.removeChild(Child);
     }
 
     function updateTodoInDom(oldTodo, newTodo) {
+        const toUpdate=document.getElementById(`${oldTodo.id}`);
+        const  title=toUpdate.getElementsByTagName('h2')[0];
+        const descrption=toUpdate.getElementsByClassName('description')[0]
         
+        title.textContent=`Task: ${newTodo.title}`;
+        descrcription.textContent=`Description: ${newTodo.description}`;
     }
 
     function updateState(newTodos) {
