@@ -7,7 +7,7 @@
     let todoState = [];
     let oldTodoState = [];
 
-    function addTodoToDom() {
+    function addTodoToDom(todo) {
       const newChild=document.createElement('div');
       newChild.setAttribute("id",`${todo.id}`)
 
@@ -21,22 +21,21 @@
       newChild.appendChild(description);
 
       const Parent= document.getElementById('todos');
-      todolist.appendChild(newChild);
+      Parent.appendChild(newChild);
     }
 
     function removeTodoFromDom(todo) {
-      const Parent=document.getElementById('todos');
       const Child=document.getElementById(todo)
-      todolist.removeChild(Child);
+      Child.parentNode.removeChild(Child);
     }
 
     function updateTodoInDom(oldTodo, newTodo) {
         const toUpdate=document.getElementById(`${oldTodo.id}`);
         const  title=toUpdate.getElementsByTagName('h2')[0];
-        const descrption=toUpdate.getElementsByClassName('description')[0]
+        const description=toUpdate.getElementsByClassName('description')[0]
         
         title.textContent=`Task: ${newTodo.title}`;
-        descrcription.textContent=`Description: ${newTodo.description}`;
+        descrption.textContent=`Description: ${newTodo.description}`;
     }
 
     function updateState(newTodos) {
@@ -51,6 +50,28 @@
       // calculate these 3 arrays
       // call addTodo, removeTodo, updateTodo functions on each of the
       // elements
+      // Step 1: Find added, deleted, and updated todos
+  newTodos.forEach(newTodo => {
+    const oldTodoIndex = oldTodoState.findIndex(oldTodo => oldTodo.id === newTodo.id);
+    if (oldTodoIndex === -1) {
+      // If the new todo is not found in the oldTodoState, it's added
+      added.push(newTodo);
+    } else {
+      // If the new todo is found in the oldTodoState, check if it's updated
+      if (!isEqual(oldTodoState[oldTodoIndex], newTodo)) {
+        // Push the old and new todos to the updated array
+        updated.push({ oldTodo: oldTodoState[oldTodoIndex], newTodo: newTodo });
+      }
+    }
+  });
+
+  oldTodoState.forEach(oldTodo => {
+    const isDeleted = newTodos.findIndex(newTodo => newTodo.id === oldTodo.id) === -1;
+    if (isDeleted) {
+      deleted.push(oldTodo);
+    }
+  });
+      
       oldTodoState = newTodos;
     }
 
